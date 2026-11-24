@@ -33,7 +33,7 @@ var linhas = new (string t, bool novaPagina)[]
 };
 
 var b = new PdfDocumentBuilder();
-var fonte = b.AddStandard14Font(UglyToad.PdfPig.Fonts.Standard14Fonts.Standard14Font.Helvetica);
+var fonte = b.AddTrueTypeFont(File.ReadAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf")));
 var pg = b.AddPage(595, 842);
 double y = 800;
 foreach (var (t, _) in linhas)
