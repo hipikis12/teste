@@ -284,157 +284,7 @@ public class Extrator
         return pecas;
     }
 
-    // ---------------- rótulos ----------------
-
-    static readonly (string pat, string rot)[] RotSecao =
-    {
-        (@"F[ÉE]RIAS\s*[–-]\s*SEM EFEITO", "FÉRIAS – SEM EFEITO"),
-        (@"F[ÉE]RIAS|^RETORNO|INFORMATIVO DE F", "FÉRIAS"),
-        (@"DISPENSA (COMO|POR)? ?RECOMPENSA|DISPENSA RECOMPENSA", "DISPENSA COMO RECOMPENSA"),
-        (@"ELOGIO", "ELOGIO"),
-        (@"LICEN[ÇC]A ESPECIAL", "LICENÇA ESPECIAL"),
-        (@"PATERNIDADE", "LICENÇA PATERNIDADE"),
-        (@"NUPCIAL|N[ÚU]PCIAS", "LICENÇA NUPCIAL"),
-        (@"TR[ÂA]NSITO|INSTALA[ÇC][ÃA]O", "TRÂNSITO / INSTALAÇÃO"),
-        (@"^PORTARIA", "PORTARIA"),
-        (@"^OF[ÍI]CIO", "OFÍCIO"),
-        (@"^REQUERIMENTO", "REQUERIMENTO"),
-        (@"^PARECER", "PARECER"),
-        (@"MOVIMENTO SANIT|INSPE[ÇC][ÃA]O DE SA[ÚU]DE|ATA M[ÉE]DICA", "MOVIMENTO SANITÁRIO"),
-        (@"NOTA DE PUNI", "NOTA DE PUNIÇÃO"),
-        (@"ERRATA", "ERRATA"),
-        (@"^DESPACHO", "DESPACHO"),
-        (@"^DECIS", "DECISÃO"),
-        (@"^MEMORANDO", "MEMORANDO"),
-        (@"^AFASTAMENTO", "AFASTAMENTO"),
-        (@"^CERTID", "CERTIDÃO"),
-        (@"^CURSO", "CURSOS"),
-        (@"ATESTADO DE ORIGEM", "ATESTADO DE ORIGEM"),
-    };
-    static readonly (string pat, string rot)[] RotDocumento =
-    {
-        (@"^(Concedo|Elogi|É por dever|Louvo|Fica concedido|\(\d{8}\)\s*(Fica|Concedo|Elogio))", "ELOGIO"),
-        (@"SOLU[ÇC][ÃA]O DE ATESTADO DE ORIGEM", "SOLUÇÃO DE ATESTADO DE ORIGEM"),
-        (@"^(Portaria|PORTARIA) N", "PORTARIA"),
-        (@"^(Portaria|PORTARIA) n", "PORTARIA"),
-        (@"^Of[íi]cio n", "OFÍCIO"),
-        (@"^Despacho", "DESPACHO"),
-        (@"^Decis[ãa]o", "DECISÃO"),
-        (@"^Parecer", "PARECER"),
-        (@"^Memorando", "MEMORANDO"),
-        (@"^ATA DE INSPE|^INSPE[ÇC][ÃA]O DE SA", "MOVIMENTO SANITÁRIO"),
-        (@"^HOMOLOGA[ÇC][ÃA]O D[EA] (SINDIC|FEITO)", "SINDICÂNCIA"),
-        (@"^HOMOLOGA", "HOMOLOGAÇÃO"),
-        (@"^CERTIFICO", "APRESENTAÇÃO"),
-        (@"^(Do\s*:|De\s*:|OBJETO|OBJETIVO|REQUERIMENTO)", "REQUERIMENTO"),
-        (@"^(MENÇÃO ELOGIOSA|O COMANDANTE[^.]{0,200}?consigna)", "ELOGIO"),
-        (@"^(?:\(\d{8}\)\s*)?TERMO DE", "INFORMAÇÃO"),
-        (@"^ERRATA", "ERRATA"),
-    };
-    static readonly (string pat, string rot)[] RotApresentacao =
-    {
-        (@"[Dd]ispensa (como|por) [Rr]ecompensa", "DISPENSA COMO RECOMPENSA"),
-        (@"[Ll]icen[çc]a [Ee]special", "LICENÇA ESPECIAL"),
-        (@"[Ll]icen[çc]a [Pp]aternidade", "LICENÇA PATERNIDADE"),
-        (@"[Nn][úu]pcias|[Nn]upcial", "LICENÇA NUPCIAL"),
-        (@"[Tt]r[âa]nsito|[Ii]nstala[çc][ãa]o", "TRÂNSITO / INSTALAÇÃO"),
-        (@"[Ff][ée]rias", "FÉRIAS"),
-        (@"LTS|[Tt]ratamento de [Ss]a[úu]de|[Ll]uto", "AFASTAMENTO"),
-    };
-    static readonly (string pat, string rot)[] RotReserva =
-    {
-        (@"(?i)sindic[âa]ncia|feito preliminar", "SINDICÂNCIA"),
-        (@"(?i)\belogio\b|louvo", "ELOGIO"),
-        (@"(?i)^portaria n|dispõe sobre (a )?designa", "PORTARIA"),
-        (@"^Informa[çc][ãa]o n", "INFORMAÇÃO"),
-        (@"^Parte n", "PARTE"),
-        (@"(?i)^autoriza[çc][ãa]o", "AUTORIZAÇÃO"),
-        (@"(?i)condecora[çc]", "CONDECORAÇÃO"),
-        (@"(?i)requerimento|atendendo ao pedido", "DECISÃO"),
-        (@"^Do\s+.{0,80}Assunto", "OFÍCIO"),
-    };
-    static readonly Regex Generico = new(@"^(GERAIS|ADMINISTRATIVO|ALTERAÇÃO DE|DIVERSOS|APRESENTAÇÃO|\d[ªa] PARTE|4\.1 - JUSTIÇA|JUSTIÇA|" +
-        @"DOCUMENTOS|ASSUNTOS|HOMOLOGAÇÃO|DECRETO|INFORMAÇÕES|PARTE|TERMOS|DECLARAÇÃO|AUTORIZAÇÃO|PAGAMENTOS|NOTA|AFASTAMENTO|MOVIMENTO SANIT)", O);
-
-    static string Rotulo(string secao, List<Peca> pecas)
-    {
-        var textos = pecas.Where(p => p.Tipo == "t").Select(p => p.Texto).ToList();
-        var texto = string.Join(" ", textos);
-        if (Regex.IsMatch(texto, @"Comportamento\s*;\s*\w")) return "COMPORTAMENTO";
-        var primeiro = textos.FirstOrDefault(t => t.StartsWith("Apresentou-se"))
-                       ?? textos.FirstOrDefault(t => t.Length > 25 && !t.StartsWith("Processo")) ?? textos.FirstOrDefault() ?? "";
-        if (Regex.IsMatch(texto.Length > 400 ? texto[..400] : texto, @"SOLU[ÇC][ÃA]O DE ATESTADO DE ORIGEM")) return "SOLUÇÃO DE ATESTADO DE ORIGEM";
-        if (primeiro.StartsWith("Apresentou-se") || (Generico.IsMatch(secao) && texto.Contains("Apresentou-se")))
-        {
-            foreach (var (pat, rot) in RotApresentacao)
-                if (Regex.IsMatch(primeiro.Length > 0 ? primeiro : texto, pat)) return rot;
-            return "APRESENTAÇÃO";
-        }
-        bool forte = Regex.IsMatch(secao, @"F[ÉE]RIAS|ELOGIO|DISPENSA|LICEN|TR[ÂA]NSITO|INSTALA") && !secao.StartsWith("PORTARIA");
-        if (!forte)
-            foreach (var t in textos.Take(3))
-                foreach (var (pat, rot) in RotDocumento)
-                    if (Regex.IsMatch(t.Length > 200 ? t[..200] : t, pat)) return rot;
-        foreach (var (pat, rot) in RotSecao)
-            if (Regex.IsMatch(secao, pat)) return rot;
-        if (!Generico.IsMatch(secao)) return Regex.Replace(secao, @"^(\d[ªa] PARTE\s*[–-]\s*)", "");
-        var r = secao switch
-        {
-            "HOMOLOGAÇÃO" => "HOMOLOGAÇÃO", "DECRETO" => "DECRETO", "AUTORIZAÇÃO" => "AUTORIZAÇÃO",
-            "DECLARAÇÃO" => "DECLARAÇÃO", "TERMOS" => "TERMO", "NOTA" => "NOTA", _ => "PUBLICAÇÃO",
-        };
-        if (r == "PUBLICAÇÃO")
-        {
-            var cab = texto.Length > 500 ? texto[..500] : texto;
-            foreach (var (pat, rot) in RotReserva)
-                if (Regex.IsMatch(cab, pat)) return rot;
-        }
-        return r;
-    }
-
     // ---------------- montagem dos blocos ----------------
-
-    static readonly Regex EntradaPosto = new(@"(?=\b(?:CB|SD|ASP|ST|SUB ?TEN|CAP|MAJ|TEN ?CEL|CEL|[123]º SGT|[12]º TEN)\s+(?:QPPM|QOPM|QOAPM|QPPMS|QOPMS|QOA ?PM|QPM|PM)\b)", O);
-    static readonly Regex ListaElogio = new(@"^(Elogio\s+(?:os|aos|as|às)\s+(?:Policiais\s+Militares|PPMM|militares)\s*)(.*?)(\s+(?:pelo|pela|pelos|pelas|por|em raz[ãa]o|devido|em virtude|que)\s.*)$", O | RegexOptions.Singleline);
-
-    /// <summary>Elogio coletivo: mantém só a entrada do próprio PM na lista de nomes e abrevia as demais com (...).</summary>
-    static string ReduzListaElogio(string txt, string nomeNorm)
-    {
-        if (nomeNorm.Length == 0) return txt;
-        var m = ListaElogio.Match(txt);
-        if (!m.Success) return txt;
-        var entradas = EntradaPosto.Split(m.Groups[2].Value).Select(e => e.Trim()).Where(e => e.Length > 0).ToList();
-        if (entradas.Count < 3) return txt;
-        var saida = new List<string>();
-        bool omitiu = false, achou = false;
-        foreach (var e in entradas)
-        {
-            if (Regex.Replace(Texto.Norm(e), @"\s+", " ").Contains(nomeNorm)) { saida.Add(e.TrimEnd(',', ' ')); omitiu = false; achou = true; }
-            else if (!omitiu) { saida.Add("(...)"); omitiu = true; }
-        }
-        if (!achou) return txt;
-        var lista = string.Join(", ", saida).Replace("(...), ", "(...) ").Replace(", (...)", " (...)");
-        return m.Groups[1].Value + lista + m.Groups[3].Value;
-    }
-
-    /// <summary>Remove lixo de linhas sobrepostas do PDF (trecho repetido, sobras de letras).</summary>
-    static string LimpaSobreposicao(string txt)
-    {
-        foreach (Match m in Regex.Matches(txt, @"Art\. \d+º [^.]{35}"))
-        {
-            int i2 = txt.IndexOf(m.Value, m.Index + 1, StringComparison.Ordinal);
-            if (i2 <= 0 || i2 - m.Index >= 600) continue;
-            var seg = txt.Substring(m.Index, i2 - m.Index).Trim();
-            if (Regex.IsMatch(seg, @"[\.;:]$") || Regex.IsMatch(seg, @"LEIA-SE|SEM EFEITO|TORNAR|ONDE SE LÊ", RegexOptions.IgnoreCase)) continue;
-            txt = txt.Remove(m.Index, i2 - m.Index);
-            break;
-        }
-        txt = Regex.Replace(txt, @"\bPol (Militar|Civil)\b", "Polícia $1");
-        txt = Regex.Replace(txt, @"(.{25,160}?\))[,;]?\s+\1", "$1");
-        txt = Regex.Replace(txt, @"(\(\.\.\.\))\s+(?:[a-zíãõé]{1,5}\s+){1,4}[a-zíãõé]{1,5}$", "$1");
-        return txt;
-    }
-
 
     static List<Bloco> ParaBlocos(List<Peca> pecas, string nomeNorm = "")
     {
@@ -443,7 +293,7 @@ public class Extrator
         void Flush()
         {
             if (buf.Count == 0) return;
-            var t = ReduzListaElogio(LimpaSobreposicao(Texto.Limpa(Texto.Compacta(string.Join(" ", buf)))), nomeNorm);
+            var t = TratamentoTexto.ReduzListaElogio(TratamentoTexto.LimpaSobreposicao(Texto.Limpa(Texto.Compacta(string.Join(" ", buf)))), nomeNorm);
             if (t.Length > 0 && t != "(...)") blocos.Add(Bloco.Paragrafo(t));
             buf.Clear();
         }
@@ -518,7 +368,7 @@ public class Extrator
                     if (!pecas.Any(p => p.Tipo is "t" or "tab")) continue;
                     var blocos = ParaBlocos(pecas, _id.NomeNorm(P));
                     if (blocos.Count == 0) continue;
-                    var pub = new Publicacao { PolicialId = P, Rotulo = Rotulo(ato.Secao, pecas), Blocos = blocos, Ordem = ordem };
+                    var pub = new Publicacao { PolicialId = P, Rotulo = Rotulador.Rotulo(ato.Secao, pecas.Where(p => p.Tipo == "t").Select(p => p.Texto).ToList()), Blocos = blocos, Ordem = ordem };
                     var chave = P + "|" + JsonSerializer.Serialize(blocos);
                     if (!vistos.Add(chave)) continue; // repetição exata no mesmo BI
                     // mesma portaria publicada duas vezes no BI (texto do BI + cópia do Diário Oficial)
