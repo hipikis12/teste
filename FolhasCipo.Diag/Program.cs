@@ -6,41 +6,42 @@ using System.Text;
 
 // Teste de fumaça: gera um BI sintético (nomes FICTÍCIOS, mesmo layout de um elogio coletivo),
 // lê com o mesmo código do programa e confere se o elogio chega à folha do policial.
-var linhas = new (string t, bool novaPagina)[]
+var linhas = new (int pag, double top, string t)[]
 {
-    ("BOLETIM INTERNO da CIPO Nº 11 de 09 de Março de 2026", false),
-    ("2ª PARTE - ASSUNTOS GERAIS E ADMINISTRATIVOS", false),
-    ("ELOGIOS:", false),
-    ("Elogio os Policiais Militares 1º SGT QPPM ******002 ARNALDO PEREIRA LIMA, CB QPPM", false),
-    ("******587 VALTER ROCHA DA SILVA, CB QPPM 100094418 ELIAS JOSÉ BARROS, CB QPPM", false),
-    ("******069 OSVALDO ARAÚJO DE MELO, CB QPPM ******359 GILMAR SOUZA CRUZ, CB", false),
-    ("QPPM ******009 JOAO FERREIRA PINTO, CB QPPM ******369 HENRIQUE FONSECA REGO,", false),
-    ("CB QPPM ******275 DAVI MIGUEL CARVALHO DE SOUZA, CB QPPM ******177", false),
-    ("WILSON VICENTE, CB QPPM ******275 ISAAC COSTA SOARES, CB QPPM ******522", false),
-    ("ELTON LIMA DE CARVALHO, CB QPPM ******610 TIAGO LUCAS MENDES, CB", false),
-    ("QPPM ******420 JOSÉ ALBERTO JUSTO DE FREITAS, CB QPPM ******605 SILAS ALVES MARTINS pelo empenho, dedicação e espírito de colaboração", false),
-    ("demonstrados na realização de diversos serviços no âmbito desta Unidade.", false),
-    ("Os referidos militares atuaram de forma voluntariosa e eficiente na limpeza e organização das dependências do", false),
-    ("quartel, na reorganização de bens móveis e materiais de consumo no almoxarifado.", false),
-    ("Diante do exposto, registro o presente elogio como forma de justo reconhecimento ao elevado padrão de", false),
-    ("integrantes da tropa. (COLETIVO). BRUNO PEDRO DE FARIA - 1º TEN QOAPM.", false),
-    ("Concedo elogio aos policiais militares CB QPPM ******421 JOSIEL ALMEIDA SANTANA, CB QPPM", false),
-    ("******189 JORGE MENDES CAMPELO, pelo destacado", false),
-    ("desempenho nas atividades de fiscalização de trânsito no município de Buritis.", false),
-    ("criminosas de trânsito. (COLETIVO).", false),
-    ("BRUNO PEDRO DE FARIA - 1º TEN QOAPM", false),
-    ("Subcomandante da CIPO/CRP-IV", false),
+    (1, 60, "BOLETIM INTERNO da CIPO Nº 11 de 09 de Março de 2026"),
+    (1, 80, "2ª PARTE - ASSUNTOS GERAIS E ADMINISTRATIVOS"),
+    (1, 120, "ELOGIOS:"),
+    (1, 369, "Elogio os Policiais Militares 1º SGT QPPM ******002 ARNALDO PEREIRA LIMA, CB QPPM"),
+    (1, 382, "******587 VALTER ROCHA DA SILVA, CB QPPM 100094418 ELIAS JOSÉ BARROS, CB QPPM"),
+    (1, 395, "******069 OSVALDO ARAÚJO DE MELO, CB QPPM ******359 GILMAR SOUZA CRUZ, CB"),
+    (1, 409, "QPPM ******009 JOAO FERREIRA PINTO, CB QPPM ******369 HENRIQUE FONSECA REGO,"),
+    (1, 422, "CB QPPM ******275 DAVI MIGUEL CARVALHO DE SOUZA, CB QPPM ******177"),
+    (1, 435, "WILSON VICENTE, CB QPPM ******275 ISAAC COSTA SOARES, CB QPPM ******522"),
+    (1, 448, "ELTON LIMA DE CARVALHO, CB QPPM ******610 TIAGO LUCAS MENDES, CB"),
+    (1, 462, "QPPM ******420 JOSÉ ALBERTO JUSTO DE FREITAS, CB QPPM ******578 PAULO FARIAS, CB"),
+    (1, 475, "QPPM ******605 SILAS ALVES MARTINS pelo empenho, dedicação e espírito de colaboração"),
+    (1, 488, "demonstrados na realização de diversos serviços no âmbito desta Unidade."),
+    (1, 507, "Os referidos militares atuaram de forma voluntariosa e eficiente na limpeza e organização das dependências do"),
+    (1, 520, "quartel, na reorganização de bens móveis e materiais de consumo no almoxarifado."),
+    (1, 539, "Cumpre ressaltar que tais ações foram realizadas em momento de significativa necessidade por parte do"),
+    (1, 552, "Comando, ocasião em que os militares demonstraram elevado espírito de cooperação."),
+    (1, 571, "Diante do exposto, registro o presente elogio como forma de justo reconhecimento ao elevado padrão de"),
+    (1, 584, "integrantes da tropa. (COLETIVO). BRUNO PEDRO DE FARIA - 1º TEN QOAPM."),
+    (1, 622, "Concedo elogio aos policiais militares CB QPPM ******421 JOSIEL ALMEIDA SANTANA, CB QPPM"),
+    (1, 635, "******189 JORGE MENDES CAMPELO, pelo destacado"),
+    (1, 648, "desempenho nas atividades de fiscalização de trânsito no município de Buritis. Os referidos militares vêm se"),
+    (1, 661, "criminosas de trânsito."),
+    (1, 680, "Recomendo que os referidos militares continuem desenvolvendo o imprescindível trabalho. (COLETIVO)."),
+    (1, 700, "BRUNO PEDRO DE FARIA - 1º TEN QOAPM"),
+    (1, 713, "Subcomandante da CIPO/CRP-IV"),
+    (1, 726, "Portaria nº 1381 de 20 de fevereiro de 2026"),
 };
 
 var b = new PdfDocumentBuilder();
 var fonte = b.AddTrueTypeFont(File.ReadAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf")));
 var pg = b.AddPage(595, 842);
-double y = 800;
-foreach (var (t, _) in linhas)
-{
-    pg.AddText(t, 8, new UglyToad.PdfPig.Core.PdfPoint(40, y), fonte);
-    y -= 13;
-}
+foreach (var (_, top, t) in linhas)
+    pg.AddText(t, 9, new UglyToad.PdfPig.Core.PdfPoint(60, 842 - top), fonte);
 var caminho = Path.Combine(Path.GetTempPath(), "bi_sintetico.pdf");
 File.WriteAllBytes(caminho, b.Build());
 
