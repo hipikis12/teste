@@ -423,7 +423,15 @@ public class Extrator
         var vistos = new HashSet<string>();
         foreach (var (ato, todas) in juntos)
         {
-            foreach (var us in SepararDocumentos(todas))
+            // fragmento (lista de nomes/assinatura que sobrou de um elogio) volta para o documento anterior
+            var docs = new List<List<Unidade>>();
+            foreach (var g in SepararDocumentos(todas))
+            {
+                bool fragmento = docs.Count > 0 && (g[0].Tipo == "entry" || g[0].Assin) && g.All(u => u.Tipo != "table")
+                                 && !g.Any(u => u.Tipo == "par" && !u.Assin && (u.Txt.Length > 200 || Starter.IsMatch(u.Txt)));
+                if (fragmento) docs[^1].AddRange(g); else docs.Add(g);
+            }
+            foreach (var us in docs)
             {
                 ordem++;
                 var envolvidos = us.SelectMany(u => u.Todos).ToHashSet();
@@ -443,6 +451,10 @@ public class Extrator
                     var pub = new Publicacao { PolicialId = P, Rotulo = Rotulo(ato.Secao, pecas), Blocos = blocos, Ordem = ordem };
                     var chave = P + "|" + JsonSerializer.Serialize(blocos);
                     if (!vistos.Add(chave)) continue; // repetição exata no mesmo BI
+                    // mesma portaria publicada duas vezes no BI (texto do BI + cópia do Diário Oficial)
+                    var inicio = string.Join(" ", blocos.Where(b => b.Tipo == "p").Select(b => b.Texto));
+                    var mp = Regex.Match(inicio.Length > 400 ? inicio[..400] : inicio, @"Portaria\s*n[ºo°]?\s*(\d{3,5})\s+de\s+\d", RegexOptions.IgnoreCase);
+                    if (mp.Success && !vistos.Add(P + "|PORTARIA|" + mp.Groups[1].Value)) continue;
                     res.Publicacoes.Add(pub);
                 }
             }
