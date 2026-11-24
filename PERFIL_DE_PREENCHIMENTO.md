@@ -47,3 +47,10 @@ Regras levantadas a partir de 48 folhas feitas pela P1 em 2026 (32 policiais: ca
 
   Ficam para a revisão na aba "Publicações por policial".
 - Para repetir a comparação quando houver folhas novas, use o botão **"Conferir com folhas da P1 (PDF)..."** na aba "Gerar folhas".
+
+## Regras acrescentadas (revisão da folha de um CB)
+- Portaria longa: ficam o preâmbulo, o artigo do PM, o fechamento (dois últimos artigos) e as assinaturas; artigos de outros militares e artigos normativos genéricos viram "(...)".
+- Elogio coletivo: na lista de nomes fica só a entrada do próprio PM; as demais viram "(...)".
+- Seção de atestados/inspeções se chama "MOVIMENTO SANITÁRIO".
+- "TERMO DE DEVOLUÇÃO" etc. começam documento novo (não entram na folha de quem não é citado).
+- Texto duplicado/embaralhado por sobreposição do PDF é limpo (trecho repetido, "Pol" + "lícia").

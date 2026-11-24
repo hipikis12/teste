@@ -20,15 +20,16 @@ public class Extrator
 {
     const RegexOptions O = RegexOptions.Compiled;
     static readonly Regex Art = new(@"^\s*(Art\.?|Artigo|ART\.?|Art)\s*\d", O | RegexOptions.IgnoreCase);
+    static readonly Regex DivArtigo = new(@"(?<=[\.\);:\]])\s+(?=Art(?:igo)?\.?\s*\d+\s*[ºo°]?(?!\w))", O);
     static readonly Regex HeaderWords = new(@"\b(NOME|Nome Completo|Grad|GRAD|Graduação|Posto/Graduação|Matrícula|MATRÍCULA)\b", O);
     static readonly Regex InlineSig = new(@"(?:No Impedimento\s+)?\b[A-ZÀ-Ý][A-ZÀ-Ý'´ ]{5,}?\s*[-–]\s*(?:\d[ºª°]\s*TEN|TEN\s?CEL|TEN|CAP|MAJ|CEL|CORONEL|SUB\s?TEN|ST)\b\s*(?:QOPM|QOAPM|QOPMS|PM|QOA PM)?", O);
     static readonly Regex Starter = new(@"^(\(\d{8}\)\s*(?:Fica concedido|Concedo|Elogio|É por dever|Louvo|Na ocasião|Informo)|Fica concedido|Concedo elogio|Concedo o presente elogio|Elogio (o|a|os|as|aos|ao)\b|Elogiar|É por dever de justiça|" +
         @"Louvo|Portaria n[ºo°]\s*\d+\s+de|PORTARIA N[ºo°]\s*\d+\s+DE|Of[íi]cio n[ºo°]|Despacho n[ºo°]|Decis[ãa]o n[ºo°]|" +
         @"Parecer n[ºo°]|Memorando n[ºo°]|Apresentou-se|CERTIFICO|ATA DE INSPE[ÇC][ÃA]O|SOLU[ÇC][ÃA]O DE ATESTADO|" +
-        @"(?:Do|De)\s*:|OBJETO\s*:|OBJETIVO\s*:|ERRATA|Nota n[ºo°]|Termo n[ºo°]|Comportamento e Pontua|MENÇÃO ELOGIOSA|REQUERIMENTO\b|" +
+        @"(?:Do|De)\s*:|OBJETO\s*:|OBJETIVO\s*:|ERRATA|Nota n[ºo°]|Termo n[ºo°]|TERMO DE (?:DEVOLU|ENTREGA|RESPONSABILIDADE|CAUTELA)|Comportamento e Pontua|MENÇÃO ELOGIOSA|REQUERIMENTO\b|" +
         @"(?:\(\d{8}\)\s*)?O COMANDANTE[^.]{0,200}?consigna[r]?\s+elogio)", O);
     static readonly Regex DocStart = new(@"^(\(\d{8}\)|MENÇÃO ELOGIOSA|REQUERIMENTO|De\s*:|O COMANDANTE[^.]{0,200}?consigna|Fica concedido|Concedo|Elogi|É por dever|Louvo|Portaria|PORTARIA|Of[íi]cio|Despacho|Decis|Parecer|Memorando|" +
-        @"CERTIFICO|ATA DE|SOLU|Do\s*:|OBJET|ERRATA|Nota n|Termo n)", O);
+        @"CERTIFICO|ATA DE|SOLU|Do\s*:|OBJET|ERRATA|Nota n|Termo n|TERMO DE)", O);
     static readonly Regex FimConector = new(@"(,|\b(de|do|da|dos|das|o|a|os|as|ao|aos|pelo|pela|e|ou|que|com|militar|militares|policiais|policial|sendo|ambos))\s*$", O | RegexOptions.IgnoreCase);
     static readonly Regex Fechamento = new(@"^(Buritis|Quartel|Porto Velho|Publique|Cumpra|Registre|\(\.\.\.\)|Art|Par[áa]grafo|[IVX]+\s*[–-])", O);
 
@@ -45,7 +46,9 @@ public class Extrator
         public List<HashSet<int>> Quem = new();
         public HashSet<int> Todos = new();
         public string Txt = "";
-        public bool TemPessoas => Tipo == "entry" || (Tipo == "table" && Rows.Count > 0);
+        public bool ArtigoDividido;
+        public bool TemPessoas => Tipo == "entry" || (Tipo == "table" && Rows.Count > 0)
+                                  || (Tipo == "par" && !Assin && ArtigoDividido && Todos.Count > 0);
     }
 
     record Peca(string Tipo, string Texto = "", List<string>? Cab = null, List<List<string>>? Rows = null); // t | o | tab
@@ -143,6 +146,22 @@ public class Extrator
             }
             div.Add(u);
         }
+        // parágrafo corrido com vários artigos ("Artigo 1º - ... Artigo 2º - ..."): uma unidade por artigo
+        var porArtigo = new List<Unidade>();
+        foreach (var u in div)
+        {
+            if (u.Tipo == "par" && !u.Assin)
+            {
+                var partes = DivArtigo.Split(JuntarLinhas(u.Linhas)).Where(p => p.Trim().Length > 0).ToList();
+                if (partes.Count >= 3 && partes.Count(p => Art.IsMatch(p)) >= 2)
+                {
+                    foreach (var p in partes) porArtigo.Add(new Unidade { Tipo = "par", Linhas = { p.Trim() } });
+                    continue;
+                }
+            }
+            porArtigo.Add(u);
+        }
+        div = porArtigo;
         foreach (var u in div)
         {
             if (u.Tipo == "table")
@@ -154,6 +173,7 @@ public class Extrator
             {
                 u.Txt = JuntarLinhas(u.Linhas);
                 u.Todos = u.Assin ? new() : _id.Mencoes(TiraAssinaturaEmbutida(u.Txt));
+                u.ArtigoDividido = u.Tipo == "par" && !u.Assin && Art.IsMatch(u.Txt);
             }
         }
         return div;
@@ -210,12 +230,19 @@ public class Extrator
         if (documento)
         {
             var blocos = Artigos(us);
-            foreach (var blk in blocos)
+            var artIdx = Enumerable.Range(0, blocos.Count)
+                .Where(i => us[blocos[i][0]].Tipo == "par" && Art.IsMatch(us[blocos[i][0]].Txt)).ToList();
+            bool algumP = blocos.Any(b => b.Any(k => us[k].Todos.Contains(P)));
+            var protegidos = artIdx.TakeLast(2).ToHashSet(); // os dois últimos artigos (publicação / vigência) ficam
+            for (int bi = 0; bi < blocos.Count; bi++)
             {
+                var blk = blocos[bi];
                 bool temPessoas = blk.Any(k => us[k].TemPessoas);
                 bool pDentro = blk.Any(k => us[k].Todos.Contains(P));
                 bool ehArt = us[blk[0]].Tipo == "par" && Art.IsMatch(us[blk[0]].Txt);
                 if (ehArt && temPessoas && !pDentro && blocos.Count > 2) continue; // artigo só com outros militares
+                if (ehArt && !temPessoas && !pDentro && algumP && artIdx.Count >= 5
+                    && !protegidos.Contains(bi) && !blk.Any(k => us[k].Assin)) continue; // artigo normativo genérico de ato longo
                 foreach (var k in blk)
                 {
                     var u = us[k];
@@ -301,6 +328,7 @@ public class Extrator
         (@"^CERTIFICO", "APRESENTAÇÃO"),
         (@"^(Do\s*:|De\s*:|OBJETO|OBJETIVO|REQUERIMENTO)", "REQUERIMENTO"),
         (@"^(MENÇÃO ELOGIOSA|O COMANDANTE[^.]{0,200}?consigna)", "ELOGIO"),
+        (@"^(?:\(\d{8}\)\s*)?TERMO DE", "INFORMAÇÃO"),
         (@"^ERRATA", "ERRATA"),
     };
     static readonly (string pat, string rot)[] RotApresentacao =
@@ -366,14 +394,56 @@ public class Extrator
 
     // ---------------- montagem dos blocos ----------------
 
-    static List<Bloco> ParaBlocos(List<Peca> pecas)
+    static readonly Regex EntradaPosto = new(@"(?=\b(?:CB|SD|ASP|ST|SUB ?TEN|CAP|MAJ|TEN ?CEL|CEL|[123]º SGT|[12]º TEN)\s+(?:QPPM|QOPM|QOAPM|QPPMS|QOPMS|QOA ?PM|QPM|PM)\b)", O);
+    static readonly Regex ListaElogio = new(@"^(Elogio\s+(?:os|aos|as|às)\s+(?:Policiais\s+Militares|PPMM|militares)\s*)(.*?)(\s+(?:pelo|pela|pelos|pelas|por|em raz[ãa]o|devido|em virtude|que)\s.*)$", O | RegexOptions.Singleline);
+
+    /// <summary>Elogio coletivo: mantém só a entrada do próprio PM na lista de nomes e abrevia as demais com (...).</summary>
+    static string ReduzListaElogio(string txt, string nomeNorm)
+    {
+        if (nomeNorm.Length == 0) return txt;
+        var m = ListaElogio.Match(txt);
+        if (!m.Success) return txt;
+        var entradas = EntradaPosto.Split(m.Groups[2].Value).Select(e => e.Trim()).Where(e => e.Length > 0).ToList();
+        if (entradas.Count < 3) return txt;
+        var saida = new List<string>();
+        bool omitiu = false, achou = false;
+        foreach (var e in entradas)
+        {
+            if (Regex.Replace(Texto.Norm(e), @"\s+", " ").Contains(nomeNorm)) { saida.Add(e.TrimEnd(',', ' ')); omitiu = false; achou = true; }
+            else if (!omitiu) { saida.Add("(...)"); omitiu = true; }
+        }
+        if (!achou) return txt;
+        var lista = string.Join(", ", saida).Replace("(...), ", "(...) ").Replace(", (...)", " (...)");
+        return m.Groups[1].Value + lista + m.Groups[3].Value;
+    }
+
+    /// <summary>Remove lixo de linhas sobrepostas do PDF (trecho repetido, sobras de letras).</summary>
+    static string LimpaSobreposicao(string txt)
+    {
+        foreach (Match m in Regex.Matches(txt, @"Art\. \d+º [^.]{35}"))
+        {
+            int i2 = txt.IndexOf(m.Value, m.Index + 1, StringComparison.Ordinal);
+            if (i2 <= 0 || i2 - m.Index >= 600) continue;
+            var seg = txt.Substring(m.Index, i2 - m.Index).Trim();
+            if (Regex.IsMatch(seg, @"[\.;:]$") || Regex.IsMatch(seg, @"LEIA-SE|SEM EFEITO|TORNAR|ONDE SE LÊ", RegexOptions.IgnoreCase)) continue;
+            txt = txt.Remove(m.Index, i2 - m.Index);
+            break;
+        }
+        txt = Regex.Replace(txt, @"\bPol (Militar|Civil)\b", "Polícia $1");
+        txt = Regex.Replace(txt, @"(.{25,160}?\))[,;]?\s+\1", "$1");
+        txt = Regex.Replace(txt, @"(\(\.\.\.\))\s+(?:[a-zíãõé]{1,5}\s+){1,4}[a-zíãõé]{1,5}$", "$1");
+        return txt;
+    }
+
+
+    static List<Bloco> ParaBlocos(List<Peca> pecas, string nomeNorm = "")
     {
         var blocos = new List<Bloco>();
         var buf = new List<string>();
         void Flush()
         {
             if (buf.Count == 0) return;
-            var t = Texto.Limpa(Texto.Compacta(string.Join(" ", buf)));
+            var t = ReduzListaElogio(LimpaSobreposicao(Texto.Limpa(Texto.Compacta(string.Join(" ", buf)))), nomeNorm);
             if (t.Length > 0 && t != "(...)") blocos.Add(Bloco.Paragrafo(t));
             buf.Clear();
         }
@@ -446,7 +516,7 @@ public class Extrator
                 {
                     var pecas = Trecho(us, P, documento);
                     if (!pecas.Any(p => p.Tipo is "t" or "tab")) continue;
-                    var blocos = ParaBlocos(pecas);
+                    var blocos = ParaBlocos(pecas, _id.NomeNorm(P));
                     if (blocos.Count == 0) continue;
                     var pub = new Publicacao { PolicialId = P, Rotulo = Rotulo(ato.Secao, pecas), Blocos = blocos, Ordem = ordem };
                     var chave = P + "|" + JsonSerializer.Serialize(blocos);
