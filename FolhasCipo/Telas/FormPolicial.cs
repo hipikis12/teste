@@ -16,13 +16,17 @@ public class FormPolicial : Form
     readonly ComboBox _tipo = new() { DropDownStyle = ComboBoxStyle.DropDownList };
     readonly CheckBox _ativo = new() { Text = "Ativo no efetivo da unidade" };
     readonly TextBox _obs = new() { Multiline = true, Height = 70, ScrollBars = ScrollBars.Vertical };
+    readonly DateTimePicker _incData = new() { Format = DateTimePickerFormat.Short, ShowCheckBox = true, Checked = false };
+    readonly TextBox _incDoc = new() { PlaceholderText = "Ex.: Portaria nº 6056 de 07 de agosto de 2026 (75273493)." };
+    readonly DateTimePicker _excData = new() { Format = DateTimePickerFormat.Short, ShowCheckBox = true, Checked = false };
+    readonly TextBox _excDoc = new() { PlaceholderText = "Ex.: Portaria nº 5120 de 02 de julho de 2026 (74013569)." };
 
     public FormPolicial(Policial p)
     {
         _p = p;
         Text = p.Id == 0 ? "Novo policial" : "Editar policial";
         Width = 620;
-        Height = 560;
+        Height = 700;
         StartPosition = FormStartPosition.CenterParent;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -46,18 +50,27 @@ public class FormPolicial : Form
         _tipo.SelectedItem = _tipo.Items.Contains(p.TipoFolha) ? p.TipoFolha : "AUTO";
         _ativo.Checked = p.Ativo;
         _obs.Text = p.Observacao;
+        if (p.InclusaoData is { } di) { _incData.Value = di; _incData.Checked = true; }
+        _incDoc.Text = p.InclusaoDoc;
+        if (p.ExclusaoData is { } de) { _excData.Value = de; _excData.Checked = true; }
+        _excDoc.Text = p.ExclusaoDoc;
 
         var dica = new Label
         {
             AutoSize = true, ForeColor = SystemColors.GrayText, MaximumSize = new Size(420, 0),
             Text = "Folha AUTO: oficiais e sargentos = quadrimestral; cabos e soldados = anual.\n" +
                    "Comportamento: usado quando não há publicação de comportamento no período.\n" +
-                   "O nome completo e o nome de guerra devem ser iguais aos que aparecem nos BIs.",
+                   "O nome completo e o nome de guerra devem ser iguais aos que aparecem nos BIs.\n" +
+                   "Chegada/saída da unidade: marque a data só para quem foi transferido; a folha do período\n" +
+                   "começa/termina nessa data, o TC fica proporcional e a 1ª parte cita o documento.",
         };
         var form = Ui.Formulario(
             ("Antiguidade (ordem)", _antig), ("Posto/Graduação", _posto), ("Quadro", _quadro), ("Matrícula (RE)", _mat),
             ("Nome completo", _nome), ("Nome de guerra", _guerra), ("Sexo", _sexo), ("Unidade/Fração", _unidade),
-            ("Comportamento", _comp), ("Tipo de folha", _tipo), ("", _ativo), ("Observação", _obs), ("", dica));
+            ("Comportamento", _comp), ("Tipo de folha", _tipo), ("", _ativo),
+            ("Chegada na unidade", _incData), ("Documento da chegada", _incDoc),
+            ("Saída da unidade", _excData), ("Documento da saída", _excDoc),
+            ("Observação", _obs), ("", dica));
 
         var ok = new Button { Text = "Salvar", DialogResult = DialogResult.None, Width = 100 };
         var cancelar = new Button { Text = "Cancelar", DialogResult = DialogResult.Cancel, Width = 100 };
@@ -90,6 +103,10 @@ public class FormPolicial : Form
         _p.TipoFolha = _tipo.SelectedItem?.ToString() ?? "AUTO";
         _p.Ativo = _ativo.Checked;
         _p.Observacao = _obs.Text;
+        _p.InclusaoData = _incData.Checked ? _incData.Value.Date : null;
+        _p.InclusaoDoc = _incDoc.Text.Trim();
+        _p.ExclusaoData = _excData.Checked ? _excData.Value.Date : null;
+        _p.ExclusaoDoc = _excDoc.Text.Trim();
         DialogResult = DialogResult.OK;
         Close();
     }

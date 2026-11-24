@@ -18,7 +18,10 @@ public class AbaPoliciais : UserControl
             Ui.Col("Antiguidade", "Antig.", 55), Ui.Col("PostoGrad", "Posto/Grad.", 90), Ui.Col("Quadro", "Quadro", 65),
             Ui.Col("Matricula", "Matrícula", 90), Ui.Col("Nome", "Nome", 300), Ui.Col("NomeGuerra", "Nome de guerra", 130),
             Ui.Col("Comportamento", "Comportamento", 110), Ui.Col("TipoFolha", "Folha", 110), Ui.Col("Ativo", "Ativo", 50),
+            Ui.Col("InclusaoData", "Chegada", 85), Ui.Col("ExclusaoData", "Saída", 85),
             Ui.Col("Observacao", "Observação", 200));
+        _grid.Columns[9].DefaultCellStyle.Format = "dd/MM/yyyy";
+        _grid.Columns[10].DefaultCellStyle.Format = "dd/MM/yyyy";
         _grid.CellDoubleClick += (_, e) => { if (e.RowIndex >= 0) Editar(); };
 
         var barra = Ui.Barra(

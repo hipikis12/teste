@@ -73,7 +73,21 @@ CREATE TABLE IF NOT EXISTS publicacoes(
   editada INTEGER NOT NULL DEFAULT 0);
 CREATE INDEX IF NOT EXISTS ix_pub_pol ON publicacoes(policial_id);
 CREATE TABLE IF NOT EXISTS config(chave TEXT PRIMARY KEY, valor TEXT NOT NULL);");
+        // colunas acrescentadas depois da primeira versão
+        var cols = new HashSet<string>();
+        using (var cmd = c.CreateCommand())
+        {
+            cmd.CommandText = "PRAGMA table_info(policiais)";
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) cols.Add(r.GetString(1));
+        }
+        foreach (var (col, tipo) in new[] { ("inclusao_data", "TEXT"), ("inclusao_doc", "TEXT NOT NULL DEFAULT ''"),
+                                            ("exclusao_data", "TEXT"), ("exclusao_doc", "TEXT NOT NULL DEFAULT ''") })
+            if (!cols.Contains(col)) Exec(c, $"ALTER TABLE policiais ADD COLUMN {col} {tipo}");
     }
+
+    static string? DataSql(DateTime? d) => d?.ToString("yyyy-MM-dd");
+    static DateTime? LerData(SqliteDataReader r, int i) => r.IsDBNull(i) || r.GetString(i).Length == 0 ? null : ParseData(r.GetString(i));
 
     // ---------------- Policiais ----------------
 
@@ -81,7 +95,7 @@ CREATE TABLE IF NOT EXISTS config(chave TEXT PRIMARY KEY, valor TEXT NOT NULL);"
     {
         using var c = Abrir();
         using var cmd = c.CreateCommand();
-        cmd.CommandText = "SELECT id, antiguidade, posto, quadro, matricula, nome, nome_guerra, sexo, unidade, comportamento, tipo_folha, ativo, observacao FROM policiais"
+        cmd.CommandText = "SELECT id, antiguidade, posto, quadro, matricula, nome, nome_guerra, sexo, unidade, comportamento, tipo_folha, ativo, observacao, inclusao_data, inclusao_doc, exclusao_data, exclusao_doc FROM policiais"
                           + (somenteAtivos ? " WHERE ativo = 1" : "") + " ORDER BY antiguidade, nome";
         using var r = cmd.ExecuteReader();
         var l = new List<Policial>();
@@ -92,6 +106,7 @@ CREATE TABLE IF NOT EXISTS config(chave TEXT PRIMARY KEY, valor TEXT NOT NULL);"
                 Matricula = r.GetString(4), Nome = r.GetString(5), NomeGuerra = r.GetString(6), Sexo = r.GetString(7),
                 Unidade = r.GetString(8), Comportamento = r.GetString(9), TipoFolha = r.GetString(10),
                 Ativo = r.GetInt32(11) == 1, Observacao = r.GetString(12),
+                InclusaoData = LerData(r, 13), InclusaoDoc = r.GetString(14), ExclusaoData = LerData(r, 15), ExclusaoDoc = r.GetString(16),
             });
         return l;
     }
@@ -105,11 +120,13 @@ CREATE TABLE IF NOT EXISTS config(chave TEXT PRIMARY KEY, valor TEXT NOT NULL);"
             ("$mat", p.Matricula.Trim()), ("$nome", p.Nome.Trim().ToUpperInvariant()), ("$guerra", p.NomeGuerra.Trim().ToUpperInvariant()),
             ("$sexo", p.Sexo.Trim()), ("$uni", p.Unidade.Trim()), ("$comp", p.Comportamento.Trim()), ("$tipo", p.TipoFolha),
             ("$ativo", p.Ativo ? 1 : 0), ("$obs", p.Observacao),
+            ("$incd", DataSql(p.InclusaoData)), ("$incdoc", p.InclusaoDoc.Trim()), ("$excd", DataSql(p.ExclusaoData)), ("$excdoc", p.ExclusaoDoc.Trim()),
         };
         if (p.Id == 0)
         {
-            Exec(c, @"INSERT INTO policiais(antiguidade, posto, quadro, matricula, nome, nome_guerra, sexo, unidade, comportamento, tipo_folha, ativo, observacao)
-                      VALUES($ant,$posto,$quadro,$mat,$nome,$guerra,$sexo,$uni,$comp,$tipo,$ativo,$obs)", ps);
+            Exec(c, @"INSERT INTO policiais(antiguidade, posto, quadro, matricula, nome, nome_guerra, sexo, unidade, comportamento, tipo_folha, ativo, observacao,
+                      inclusao_data, inclusao_doc, exclusao_data, exclusao_doc)
+                      VALUES($ant,$posto,$quadro,$mat,$nome,$guerra,$sexo,$uni,$comp,$tipo,$ativo,$obs,$incd,$incdoc,$excd,$excdoc)", ps);
             using var cmd = c.CreateCommand();
             cmd.CommandText = "SELECT last_insert_rowid()";
             p.Id = Convert.ToInt32(cmd.ExecuteScalar());
@@ -117,7 +134,8 @@ CREATE TABLE IF NOT EXISTS config(chave TEXT PRIMARY KEY, valor TEXT NOT NULL);"
         else
         {
             Exec(c, @"UPDATE policiais SET antiguidade=$ant, posto=$posto, quadro=$quadro, matricula=$mat, nome=$nome, nome_guerra=$guerra,
-                      sexo=$sexo, unidade=$uni, comportamento=$comp, tipo_folha=$tipo, ativo=$ativo, observacao=$obs WHERE id=$id", ps);
+                      sexo=$sexo, unidade=$uni, comportamento=$comp, tipo_folha=$tipo, ativo=$ativo, observacao=$obs,
+                      inclusao_data=$incd, inclusao_doc=$incdoc, exclusao_data=$excd, exclusao_doc=$excdoc WHERE id=$id", ps);
         }
     }
 

@@ -48,6 +48,16 @@ O banco fica em `dados\folhas.db`, ao lado do executável. **Faça backup desse 
    - **Nova publicação manual**: inclui algo que o programa não pegou.
    - Itens editados ou incluídos à mão aparecem em azul. Eles **não são apagados** quando o BI é reprocessado.
 
+## Policial transferido (chegada ou saída no meio do período)
+
+Na edição do policial, marque **Chegada na unidade** e/ou **Saída da unidade** e informe o documento (ex.: "Portaria nº 6056 de 07 de agosto de 2026 (75273493)."). Na geração:
+
+- a folha do período começa ou termina nessa data (ex.: "PERÍODO: 05 Ago 26 a 30 Set 26");
+- o TC fica proporcional;
+- a 1ª parte cita o documento.
+
+Se ele não esteve na unidade em nenhum dia do período, a folha não é gerada.
+
 ## Gerar as folhas
 
 Na aba **Gerar folhas**, escolha o ano, o quadrimestre e o tipo, marque os policiais e clique em **Gerar folhas**.
@@ -60,7 +70,12 @@ Na aba **Gerar folhas**, escolha o ano, o quadrimestre e o tipo, marque os polic
 - A folha traz apenas os BIs com data dentro do período.
 - **CONF BI** é o último BI importado dentro do período.
 - **Comportamento** é a última publicação de comportamento até o fim do período. Se não houver nenhuma, vale o comportamento do cadastro do policial. Oficiais não têm comportamento.
+- FOLHA Nº é sempre 01, como nas folhas da P1.
 - As folhas são salvas em subpastas (`Anual 2026` e `Oficiais e Sargentos - quadrimestral\1 Quadrimestre 2026`), com um `.docx` por policial, prontas para copiar e colar no SEI.
+
+## Conferir com as folhas da P1
+
+O botão **"Conferir com folhas da P1 (PDF)..."**, na aba Gerar folhas, lê folhas feitas à mão (PDF exportado do SEI) e compara BI por BI com o que o sistema lança para o mesmo policial e período. O relatório mostra o que falta e o que sobra. As regras levantadas das folhas da P1 estão em `PERFIL_DE_PREENCHIMENTO.md`.
 
 ## Como a extração funciona (resumo)
 
@@ -82,6 +97,7 @@ Na aba **Gerar folhas**, escolha o ano, o quadrimestre e o tipo, marque os polic
 | `Extracao/Extrator.cs` | Recorta o trecho de cada policial e dá o título do item |
 | `Servicos/ImportadorBi.cs` | Importa o PDF e grava no banco |
 | `Servicos/GeradorFolha.cs` | Monta o .docx no modelo da folha |
+| `Servicos/Conferencia.cs` | Compara as folhas da P1 com o sistema |
 | `Servicos/ServicoFolhas.cs` | Escolhe período e publicações, gera os arquivos e importa a planilha |
 | `Dados/Database.cs` | SQLite: policiais, boletins, publicações e configuração |
 | `Telas/*` | Telas (feitas em código, sem designer) |

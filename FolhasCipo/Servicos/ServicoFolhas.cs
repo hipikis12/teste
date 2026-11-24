@@ -37,7 +37,13 @@ public class ServicoFolhas
         foreach (var p in policiais)
         {
             bool quad = modo switch { "ANUAL" => false, "QUADRIMESTRAL" => true, _ => p.FolhaQuadrimestral };
-            var per = quad ? Periodo.Quadrimestral(ano, quadrimestre) : Periodo.Anual(ano);
+            var basePer = quad ? Periodo.Quadrimestral(ano, quadrimestre) : Periodo.Anual(ano);
+            var per = basePer.Recortar(p);
+            if (per == null)
+            {
+                progresso?.Report($"{p.Descricao}: não estava na unidade no período – folha não gerada.");
+                continue;
+            }
             var todas = _db.ListarPublicacoes(p.Id);
             var noPeriodo = todas.Where(x => x.BiData >= per.Inicio && x.BiData <= per.Fim).ToList();
             var ultimoBi = boletins.Where(b => b.Data >= per.Inicio && b.Data <= per.Fim).OrderBy(b => b.Data).LastOrDefault();
@@ -54,7 +60,7 @@ public class ServicoFolhas
             var caminho = Path.Combine(sub, nome);
             gerador.Gerar(dados, caminho);
             arquivos.Add(caminho);
-            progresso?.Report(nome);
+            progresso?.Report("Gerada: " + nome);
         }
         return arquivos;
     }

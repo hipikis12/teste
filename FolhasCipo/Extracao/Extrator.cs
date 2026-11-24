@@ -25,8 +25,9 @@ public class Extrator
     static readonly Regex Starter = new(@"^(\(\d{8}\)\s*(?:Fica concedido|Concedo|Elogio|É por dever|Louvo|Na ocasião|Informo)|Fica concedido|Concedo elogio|Concedo o presente elogio|Elogio (o|a|os|as|aos|ao)\b|Elogiar|É por dever de justiça|" +
         @"Louvo|Portaria n[ºo°]\s*\d+\s+de|PORTARIA N[ºo°]\s*\d+\s+DE|Of[íi]cio n[ºo°]|Despacho n[ºo°]|Decis[ãa]o n[ºo°]|" +
         @"Parecer n[ºo°]|Memorando n[ºo°]|Apresentou-se|CERTIFICO|ATA DE INSPE[ÇC][ÃA]O|SOLU[ÇC][ÃA]O DE ATESTADO|" +
-        @"Do\s*:|OBJETO\s*:|OBJETIVO\s*:|ERRATA|Nota n[ºo°]|Termo n[ºo°]|Comportamento e Pontua)", O);
-    static readonly Regex DocStart = new(@"^(\(\d{8}\)|Fica concedido|Concedo|Elogi|É por dever|Louvo|Portaria|PORTARIA|Of[íi]cio|Despacho|Decis|Parecer|Memorando|" +
+        @"(?:Do|De)\s*:|OBJETO\s*:|OBJETIVO\s*:|ERRATA|Nota n[ºo°]|Termo n[ºo°]|Comportamento e Pontua|MENÇÃO ELOGIOSA|REQUERIMENTO\b|" +
+        @"(?:\(\d{8}\)\s*)?O COMANDANTE[^.]{0,200}?consigna[r]?\s+elogio)", O);
+    static readonly Regex DocStart = new(@"^(\(\d{8}\)|MENÇÃO ELOGIOSA|REQUERIMENTO|De\s*:|O COMANDANTE[^.]{0,200}?consigna|Fica concedido|Concedo|Elogi|É por dever|Louvo|Portaria|PORTARIA|Of[íi]cio|Despacho|Decis|Parecer|Memorando|" +
         @"CERTIFICO|ATA DE|SOLU|Do\s*:|OBJET|ERRATA|Nota n|Termo n)", O);
     static readonly Regex FimConector = new(@"(,|\b(de|do|da|dos|das|o|a|os|as|ao|aos|pelo|pela|e|ou|que|com|militar|militares|policiais|policial|sendo|ambos))\s*$", O | RegexOptions.IgnoreCase);
     static readonly Regex Fechamento = new(@"^(Buritis|Quartel|Porto Velho|Publique|Cumpra|Registre|\(\.\.\.\)|Art|Par[áa]grafo|[IVX]+\s*[–-])", O);
@@ -261,7 +262,7 @@ public class Extrator
     static readonly (string pat, string rot)[] RotSecao =
     {
         (@"F[ÉE]RIAS\s*[–-]\s*SEM EFEITO", "FÉRIAS – SEM EFEITO"),
-        (@"F[ÉE]RIAS|^RETORNO|INFORMATIVO DE F", "FÉRIAS INÍCIO / RETORNO"),
+        (@"F[ÉE]RIAS|^RETORNO|INFORMATIVO DE F", "FÉRIAS"),
         (@"DISPENSA (COMO|POR)? ?RECOMPENSA|DISPENSA RECOMPENSA", "DISPENSA COMO RECOMPENSA"),
         (@"ELOGIO", "ELOGIO"),
         (@"LICEN[ÇC]A ESPECIAL", "LICENÇA ESPECIAL"),
@@ -272,7 +273,7 @@ public class Extrator
         (@"^OF[ÍI]CIO", "OFÍCIO"),
         (@"^REQUERIMENTO", "REQUERIMENTO"),
         (@"^PARECER", "PARECER"),
-        (@"MOVIMENTO SANIT|INSPE[ÇC][ÃA]O DE SA[ÚU]DE|ATA M[ÉE]DICA", "INSPEÇÃO DE SAÚDE"),
+        (@"MOVIMENTO SANIT|INSPE[ÇC][ÃA]O DE SA[ÚU]DE|ATA M[ÉE]DICA", "MOVIMENTO SANITÁRIO"),
         (@"NOTA DE PUNI", "NOTA DE PUNIÇÃO"),
         (@"ERRATA", "ERRATA"),
         (@"^DESPACHO", "DESPACHO"),
@@ -294,11 +295,12 @@ public class Extrator
         (@"^Decis[ãa]o", "DECISÃO"),
         (@"^Parecer", "PARECER"),
         (@"^Memorando", "MEMORANDO"),
-        (@"^ATA DE INSPE|^INSPE[ÇC][ÃA]O DE SA", "INSPEÇÃO DE SAÚDE"),
+        (@"^ATA DE INSPE|^INSPE[ÇC][ÃA]O DE SA", "MOVIMENTO SANITÁRIO"),
         (@"^HOMOLOGA[ÇC][ÃA]O D[EA] (SINDIC|FEITO)", "SINDICÂNCIA"),
         (@"^HOMOLOGA", "HOMOLOGAÇÃO"),
         (@"^CERTIFICO", "APRESENTAÇÃO"),
-        (@"^(Do\s*:|OBJETO|OBJETIVO)", "REQUERIMENTO"),
+        (@"^(Do\s*:|De\s*:|OBJETO|OBJETIVO|REQUERIMENTO)", "REQUERIMENTO"),
+        (@"^(MENÇÃO ELOGIOSA|O COMANDANTE[^.]{0,200}?consigna)", "ELOGIO"),
         (@"^ERRATA", "ERRATA"),
     };
     static readonly (string pat, string rot)[] RotApresentacao =
@@ -308,7 +310,7 @@ public class Extrator
         (@"[Ll]icen[çc]a [Pp]aternidade", "LICENÇA PATERNIDADE"),
         (@"[Nn][úu]pcias|[Nn]upcial", "LICENÇA NUPCIAL"),
         (@"[Tt]r[âa]nsito|[Ii]nstala[çc][ãa]o", "TRÂNSITO / INSTALAÇÃO"),
-        (@"[Ff][ée]rias", "FÉRIAS INÍCIO / RETORNO"),
+        (@"[Ff][ée]rias", "FÉRIAS"),
         (@"LTS|[Tt]ratamento de [Ss]a[úu]de|[Ll]uto", "AFASTAMENTO"),
     };
     static readonly (string pat, string rot)[] RotReserva =

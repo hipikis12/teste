@@ -35,7 +35,8 @@ public class AbaGerar : UserControl
         var linha2 = Ui.Barra(new Label { Text = "Salvar em:", AutoSize = true }, _saida,
                               Ui.Botao("...", (_, _) => EscolherPasta(), 40),
                               Ui.Botao("Gerar folhas", async (_, _) => await Gerar(), 140),
-                              Ui.Botao("Abrir pasta", (_, _) => AbrirPasta()));
+                              Ui.Botao("Abrir pasta", (_, _) => AbrirPasta()),
+                              Ui.Botao("Conferir com folhas da P1 (PDF)...", async (_, _) => await Conferir()));
 
         var selecao = new Panel { Dock = DockStyle.Left, Width = 380, Padding = new Padding(6) };
         var botoesSel = Ui.Barra(
@@ -112,6 +113,29 @@ public class AbaGerar : UserControl
         if (Directory.Exists(_saida.Text)) Process.Start(new ProcessStartInfo { FileName = _saida.Text, UseShellExecute = true });
     }
 
+    /// <summary>Compara folhas feitas pela P1 (PDF do SEI) com o que o sistema lança.</summary>
+    async Task Conferir()
+    {
+        using var dlg = new OpenFileDialog { Filter = "Folhas de alteração (*.pdf)|*.pdf", Multiselect = true, Title = "Folhas feitas pela P1" };
+        if (dlg.ShowDialog(this) != DialogResult.OK) return;
+        _log.Clear();
+        _log.AppendText("Conferindo " + dlg.FileNames.Length + " folha(s)..." + Environment.NewLine);
+        Enabled = false;
+        UseWaitCursor = true;
+        try
+        {
+            var arquivos = dlg.FileNames;
+            var relatorio = await Task.Run(() => new Conferencia(_db).Conferir(arquivos));
+            _log.AppendText(relatorio);
+        }
+        catch (Exception ex) { Ui.Erro("Erro na conferência: " + ex.Message); }
+        finally
+        {
+            Enabled = true;
+            UseWaitCursor = false;
+        }
+    }
+
     async Task Gerar()
     {
         var sel = _lista.CheckedItems.Cast<Policial>().ToList();
@@ -129,7 +153,7 @@ public class AbaGerar : UserControl
         UseWaitCursor = true;
         try
         {
-            var prog = new Progress<string>(s => _log.AppendText("Gerada: " + s + Environment.NewLine));
+            var prog = new Progress<string>(s => _log.AppendText(s + Environment.NewLine));
             var arquivos = await Task.Run(() => new ServicoFolhas(_db).Gerar(sel, ano, quad, modo, pasta, prog));
             _log.AppendText($"{Environment.NewLine}{arquivos.Count} folha(s) salvas em {pasta}{Environment.NewLine}");
         }

@@ -158,9 +158,9 @@ public class GeradorFolha
         var partes = new List<OpenXmlElement>
         {
             P(R("1ª PARTE:", true, true)),
-            P(new[] { R("INCLUSÃO: ", true), R("SEM ALTERAÇÃO."), R("\tCONF BI " + d.ConfBi, cor: "C00000") },
+            P(new[] { R("INCLUSÃO: ", true), R(d.Periodo.Inclusao), R("\tCONF BI " + d.ConfBi, cor: "C00000") },
               tabs: new Tabs(new TabStop { Val = TabStopValues.Right, Position = W - 300 })),
-            P(new[] { R("EXCLUSÃO: ", true), R("SEM ALTERAÇÃO.") }, depois: 200),
+            P(new[] { R("EXCLUSÃO: ", true), R(d.Periodo.Exclusao) }, depois: 200),
             P(new[] { R("2ª PARTE:", true, true), R(comp.Length > 0 ? "   " + comp : "", true) }),
             Pontilhado("TEMPO COMPUTADO DE EFETIVO SERVIÇO (TC) ", d.Periodo.Tc, true),
             Pontilhado("ARREGIMENTADO ", d.Periodo.Tc, false),

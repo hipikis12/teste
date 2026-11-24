@@ -20,6 +20,13 @@ public class Policial
     public bool Ativo { get; set; } = true;
     public string Observacao { get; set; } = "";
 
+    /// <summary>Chegada na unidade (quando ocorre no período, a folha começa nessa data e a 1ª parte cita o documento).</summary>
+    public DateTime? InclusaoData { get; set; }
+    public string InclusaoDoc { get; set; } = "";
+    /// <summary>Saída da unidade (a folha termina nessa data e a 1ª parte cita o documento).</summary>
+    public DateTime? ExclusaoData { get; set; }
+    public string ExclusaoDoc { get; set; } = "";
+
     public bool EhOficial => Texto.Contem(PostoGrad, "TEN", "CAP", "MAJ", "CEL");
 
     /// <summary>Oficiais e sargentos (inclui ST) têm folha quadrimestral; cabos e soldados, anual.</summary>
