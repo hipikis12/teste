@@ -28,6 +28,29 @@ public class Identificador
 
     public Policial ObterPolicial(int id) => _efetivo.First(p => p.Id == id);
     public string NomeNorm(int id) => _nomeNorm[id];
+    public IReadOnlyList<Policial> Efetivo => _efetivo;
+
+    /// <summary>Policiais cujo nome parece estar no texto, mas escrito de forma que o reconhecimento normal não pegou
+    /// (palavras faltando, trocadas ou separadas). Serve só para avisar a P1 – não lança nada sozinho.</summary>
+    public List<Policial> CitacoesDuvidosas(string texto, IEnumerable<int> reconhecidos)
+    {
+        var ja = reconhecidos.ToHashSet();
+        var toks = Texto.Norm(texto).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var res = new List<Policial>();
+        foreach (var p in _efetivo)
+        {
+            if (ja.Contains(p.Id)) continue;
+            var nome = _nomeNorm[p.Id].Split(' ').Where(t => t.Length > 2).Distinct().ToList();
+            if (nome.Count < 2) continue;
+            for (int i = 0; i < toks.Length; i++)
+            {
+                if (toks[i] != nome[0]) continue;
+                var janela = toks.Skip(i).Take(nome.Count + 3).ToHashSet();
+                if (nome.Count(t => janela.Contains(t)) >= Math.Max(2, nome.Count - 1)) { res.Add(p); break; }
+            }
+        }
+        return res;
+    }
 
     /// <summary>Padrão de posto (texto normalizado) para cada graduação.</summary>
     public static string PadraoPosto(string posto)

@@ -53,6 +53,14 @@ public class ImportadorBi
             int pms = res.Publicacoes.Select(p => p.PolicialId).Distinct().Count();
             resumo.TotalPublicacoes += res.Publicacoes.Count;
             resumo.Linhas.Add($"BI Nº {bi.Numero:00}/{bi.Data.Year} ({bi.Data:dd/MM/yyyy}): {res.Publicacoes.Count} publicações para {pms} policiais.");
+            foreach (var av in res.Avisos.Distinct()) resumo.Linhas.Add("   ATENÇÃO: " + av);
+            try
+            {
+                var pasta = Path.Combine(AppContext.BaseDirectory, "dados", "diagnostico");
+                Directory.CreateDirectory(pasta);
+                File.WriteAllLines(Path.Combine(pasta, $"BI_{bi.Numero:00}_{bi.Data.Year}.txt"), res.Diagnostico);
+            }
+            catch { /* o diagnóstico é opcional */ }
         }
         return resumo;
     }

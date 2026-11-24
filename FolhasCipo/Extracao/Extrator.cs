@@ -10,6 +10,10 @@ public class ResultadoBi
     public DateTime Data { get; set; }
     public string SeiId { get; set; } = "";
     public List<Publicacao> Publicacoes { get; } = new();
+    /// <summary>Avisos para a P1 conferir (citações que podem não ter sido reconhecidas).</summary>
+    public List<string> Avisos { get; } = new();
+    /// <summary>Relatório de leitura: cada ato, os policiais encontrados e o início do texto.</summary>
+    public List<string> Diagnostico { get; } = new();
 }
 
 /// <summary>
@@ -359,6 +363,12 @@ public class Extrator
                 foreach (var u in us.Where(u => u.Tipo != "table" && !u.Assin))
                     foreach (var p in _id.NomesDeGuerra(TiraAssinaturaEmbutida(u.Txt), envolvidos).ToList())
                         if (u.Todos.Add(p)) envolvidos.Add(p);
+                var textoGrupo = string.Join(" ", us.Where(u => u.Tipo != "table" && !u.Assin).Select(u => u.Txt));
+                foreach (var d in _id.CitacoesDuvidosas(textoGrupo, envolvidos))
+                    res.Avisos.Add($"BI {bi.Numero:00}, seção {ato.Secao}: \"{d.Nome}\" parece citado, mas o nome não foi reconhecido – confira no PDF.");
+                res.Diagnostico.Add($"[BI {bi.Numero:00}] seção={ato.Secao} | unidades={us.Count} | policiais=" +
+                    string.Join(", ", envolvidos.Select(i => _id.ObterPolicial(i).NomeGuerra)) + " | " +
+                    (textoGrupo.Length > 140 ? textoGrupo[..140] : textoGrupo));
                 var primeiro = us.FirstOrDefault(u => u.Tipo == "par");
                 bool documento = us.Any(u => u.Assin) ||
                                  (primeiro != null && DocStart.IsMatch(primeiro.Txt) && !primeiro.Txt.StartsWith("Comportamento"));
