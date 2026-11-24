@@ -148,7 +148,9 @@ public class LeitorPdf
                 if (ant != null && l.V != " " && !sb.ToString().EndsWith(" "))
                 {
                     double gap = l.X0 - ant.X1;
-                    if (gap > Math.Max(1.0, l.Tam * 0.18)) sb.Append(' ');
+                    // dígitos e ordinais (1º, 587, 2026) nunca ficam separados por um espaço pequeno
+                    bool colado = (char.IsDigit(l.V[0]) && char.IsDigit(ant.V[^1])) || (l.V is "º" or "ª" or "°" && char.IsDigit(ant.V[^1]));
+                    if (gap > Math.Max(1.0, l.Tam * (colado ? 0.6 : 0.18))) sb.Append(' ');
                 }
                 sb.Append(l.V);
                 ant = l;
