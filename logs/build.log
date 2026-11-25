@@ -1,0 +1,20 @@
+  Determining projects to restore...
+  Restored D:\a\teste\teste\FolhasCipo\FolhasCipo.csproj (in 5.03 sec).
+  FolhasCipo -> D:\a\teste\teste\FolhasCipo\bin\Release\net8.0-windows\FolhasCipo.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:15.96
+  Determining projects to restore...
+  Restored D:\a\teste\teste\FolhasCipo.Diag\FolhasCipo.Diag.csproj (in 633 ms).
+  1 of 2 projects are up-to-date for restore.
+  FolhasCipo -> D:\a\teste\teste\FolhasCipo\bin\Release\net8.0-windows\FolhasCipo.dll
+  FolhasCipo.Diag -> D:\a\teste\teste\FolhasCipo.Diag\bin\Release\net8.0-windows\FolhasCipo.Diag.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.72

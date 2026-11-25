@@ -1,0 +1,93 @@
+cabecalho 'BOLETIM INTERNO da CIPO Nº 34' => 34
+cabecalho 'BOLETIM INTERNO da CIPO Nº 11 CIPO/P-1 de 09 de Março de 2026.' => 11
+cabecalho 'B O L E T I M  I N T E R N O  da CIPO N º 1 5' => 15
+cabecalho 'BOLETIM INTERNO' => 
+cabecalho 'Publicar a presente portaria em Boletim Interno nº 5 da CIPO' => 
+=== AMOSTRA GEOMETRIA REAL: itens ===
+p1 y128 GOVERNO DO ESTADO DE RONDÔNIA
+p1 y138 PolíciaMilitar - PM
+p1 y147 CompanhiaIndependentedePoliciamento Ostensivo deBuritis- Seção dePessoal - PM-CIPOP1
+p1 y165 BOLETIM INTERNO
+p1 y182 [T] BOLETIM INTERNO daCIPO Nº 45
+DE 31 DE OUTUBRO A 06 DE NOVEMBRO DE 2026
+Paraconhecimento daCompanhiaIndependentedePoliciamento Ostensivo daPoliciaMilitar do Estado deRondôniaedevidaexecução, publico o seguinte: | BOLETIM INTERNO daCIPO Nº 45
+DE 31 DE OUTUBRO A 06 DE NOVEMBRO DE 2026
+Paraconhecimento daCompanhiaIndependentedePoliciamento Ostensivo daPoliciaMilitar do Estado deRondôniaedevidaexecução, publico o seguinte:
+p1 y291 1ªPARTE – SERVIÇOSDIÁRIOS
+p1 y313 I. SERVIÇOSDO DIA 31 DE OUTUBRO A 06 DE NOVEMBRO DE 2026.
+p1 y321 a. SERVIÇO EXTERNO
+p1 y329 Coordenador dePoliciamento do dia31 deOutubro a06 deNovembro de2026.................... 1º TEN QOAPM 100093916 ANA LELE
+p1 y338 Policiamento Ostensivo....................................................... àcargo daCIPO.
+p1 y346 b. SERVIÇO INTERNO
+p1 y354 Expediente........................................................................... àcargo daDiv. Administrativa
+p1 y363 Guardado Quartel eCentral deOperações...... ...................àcargo daCIPO.
+p1 y392 2ªPARTE - ENSINO E INSTRUÇÃO
+p1 y401 (Sem Alteração)
+p1 y431 3ªPARTE
+p1 y440 ASSUNTOSGERAISE ADMINISTRATIVOS
+p1 y466 I – GERAIS:
+p1 y479 1. ALTERAÇÃO DE OFICIAIS:
+p1 y493 a) AFASTAMENTO
+p1 y506 Sem alteração
+p1 y519 b) APRESENTAÇÃO DE OFICIAL
+p1 y532 Sem alteração
+p1 y548 c. INSPEÇÃO DE SAÚDE
+p1 y561 Sem alteração
+p1 y587 2. ALTERAÇÃO DE PRAÇA PM
+p1 y600 a. AFASTAMENTO
+p1 y613 Processo 0021.049126/2026-81
+p1 y639 Apresentou-se na Seção de Pessoal da CIPO o 2º SGT QPPM 100084522 GILMAR ZEFERINO, por início de 08 (oito) dias de Dispensa como
+p1 y648 Recompensa, conforme Portaria nº 8161 de 29 de outubro de 2026 (78176451), constante no processo nº 0021.052053/2026-13. A contar de 30/10/2026, com
+=== AMOSTRA: BIs encontrados = 45
+=== BI38 amostra: BIs=38
+=== BI38 atos: 7
+  ato [GERAIS] itens=1 assin=0 1o='DE 12 DE SETEMBRO A 18 DE SETEMBRO DE 2026'
+  ato [REQUERIMENTOS OBJETO: TRANSFERÊNCIA DE PRAÇA] itens=23 assin=3 1o='Senhor Comandante,'
+  ato [REQUERIMENTOS OBJETO: TRANSFERÊNCIA DE PRAÇA] itens=34 assin=3 1o='O B J E T O: Movimentação.'
+  ato [REQUERIMENTOS OBJETO: TRANSFERÊNCIA DE PRAÇA] itens=22 assin=2 1o='OBJETO: Inclusão de dependentes.'
+  ato [PARECER SOBRE PEDIDO DE TRANSFERÊNCIA] itens=52 assin=4 1o='Parecer nº 25/2026/PM-CRPIVDADM'
+  ato [PARECER SOBRE PEDIDO DE TRANSFERÊNCIA] itens=41 assin=4 1o='Parecer nº 29/2026/PM-CRPIVDADM'
+  ato [PARECER SOBRE PEDIDO DE TRANSFERÊNCIA] itens=17 assin=0 1o='Parecer nº 4/2026/PM-CIPOCMT'
+  PM 2 | REQUERIMENTO | len=1524 | Senhor Comandante, 1 . Eu, 2º SGT QPPM ******002 REINALDO SOUSA LIMA, servindo atualmente na CIPO/CRP-IV (Buri ... hora do sistema REINALDO SOUSA LIMA - 2º SGT QPPM Requerente Processo 0021 .000000/2026-00
+  PM 1 | REQUERIMENTO | len=2163 | O B J E T O: Movimentação. Sr. Comandante, 1 . Eu, CB QPPM 100000000 Joaquim Rocha Pires, servindo atualmente  ... a - RO, 11 /08/2026 JOAQUIM ROCHA PIRES - CB QPPM Requerente Processo 0021 .000000/2026-00
+  PM 3 | REQUERIMENTO | len=1408 | OBJETO: Inclusão de dependentes. Senhor Coordenador, 1 . Eu, CB QPPM RE 100000000 ALMIR HENRIQUE COSTA , da Po ... a-RO, data e hora do sistema. ALMIR HENRIQUE COSTA - CB QPPM Processo 0021 .000000/2025-00
+  PM 1 | REQUERIMENTO | len=1408 | OBJETO: Inclusão de dependentes. Senhor Coordenador, 1 . Eu, CB QPPM RE 100000000 ALMIR HENRIQUE COSTA , da Po ... a-RO, data e hora do sistema. ALMIR HENRIQUE COSTA - CB QPPM Processo 0021 .000000/2025-00
+  PM 2 | PARECER | len=2315 | Parecer nº 25/2026/PM-CRPIVDADM Considerando o requerimento do 2º SGT QPPM ******002 REINALDO SOUSA LIMA, serv ...  Policiamento IV Portaria nº 1334 de 19 de fevereiro de 2026 Processo 0021 .000000/2026-00
+  PM 1 | PARECER | len=2796 | Parecer nº 29/2026/PM-CRPIVDADM Considerando o requerimento do CB QPPM 100000000 JOAQUIM ROCHA PIRES, servindo ... l de Policiamento IV Portaria nº 5620 de 22 de julho de 2026 Processo 0021 .000000/2026-00
+  PM 2 | PARECER | len=1000 | Parecer nº 4/2026/PM-CIPOCMT Do: Comandante da CIPO/CRP-IV Ao: Comandante Regional de Policiamento IV Assunto: ... 1 -PM), aprovado pelo Decreto nº 8. 134, de 18 de dezembro de 1997. b. Estudo fundamentado
+  PM 1 | PARECER | len=1000 | Parecer nº 4/2026/PM-CIPOCMT Do: Comandante da CIPO/CRP-IV Ao: Comandante Regional de Policiamento IV Assunto: ... 1 -PM), aprovado pelo Decreto nº 8. 134, de 18 de dezembro de 1997. b. Estudo fundamentado
+=== ITENS LIDOS ===
+p1 y53 BOLETIM INTERNO da CIPO Nº 11 de 09 de Março de 2026
+p1 y73 2ª PARTE - ASSUNTOS GERAIS E ADMINISTRATIVOS
+p1 y113 ELOGIOS:
+p1 y362 Elogio os Policiais Militares 1º SGT QPPM ******002 ARNALDO PEREIRA LIMA, CB QPPM
+p1 y375 ******587 VALTER ROCHA DA SILVA, CB QPPM 100094418 ELIAS JOSÉ BARROS, CB QPPM
+p1 y388 ******069 OSVALDO ARAÚJO DE MELO, CB QPPM ******359 GILMAR SOUZA CRUZ, CB
+p1 y402 QPPM ******009 JOAO FERREIRA PINTO, CB QPPM ******369 HENRIQUE FONSECA REGO,
+p1 y415 CB QPPM ******275 DAVI MIGUEL CARVALHO DE SOUZA, CB QPPM ******177
+p1 y428 WILSON VICENTE, CB QPPM ******275 ISAAC COSTA SOARES, CB QPPM ******522
+p1 y441 ELTON LIMA DE CARVALHO, CB QPPM ******610 TIAGO LUCAS MENDES, CB
+p1 y455 QPPM ******420 JOSÉ ALBERTO JUSTO DE FREITAS, CB QPPM ******578 PAULO FARIAS, CB
+p1 y468 QPPM ******605 SILAS ALVES MARTINS pelo empenho, dedicação e espírito de colaboração
+p1 y481 demonstrados na realização de diversos serviços no âmbito desta Unidade.
+p1 y500 Os referidos militares atuaram de forma voluntariosa e eficiente na limpeza e organização das dependências do
+p1 y513 quartel, na reorganização de bens móveis e materiais de consumo no almoxarifado.
+p1 y532 Cumpre ressaltar que tais ações foram realizadas em momento de significativa necessidade por parte do
+p1 y545 Comando, ocasião em que os militares demonstraram elevado espírito de cooperação.
+p1 y564 Diante do exposto, registro o presente elogio como forma de justo reconhecimento ao elevado padrão de
+p1 y577 integrantes da tropa. (COLETIVO). BRUNO PEDRO DE FARIA - 1º TEN QOAPM.
+p1 y615 Concedo elogio aos policiais militares CB QPPM ******421 JOSIEL ALMEIDA SANTANA, CB QPPM
+p1 y628 ******189 JORGE MENDES CAMPELO, pelo destacado
+p1 y641 desempenho nas atividades de fiscalização de trânsito no município de Buritis. Os referidos militares vêm se
+p1 y654 criminosas de trânsito.
+p1 y673 Recomendo que os referidos militares continuem desenvolvendo o imprescindível trabalho. (COLETIVO).
+p1 y693 BRUNO PEDRO DE FARIA - 1º TEN QOAPM
+p1 y706 Subcomandante da CIPO/CRP-IV
+p1 y719 Portaria nº 1381 de 20 de fevereiro de 2026
+=== BIs: 1 ===
+=== BI 11: 2 atos ===
+  ato [ELOGIOS] itens=23 assin=2
+  ato [ELOGIOS] itens=1 assin=0
+  PM 1 | ELOGIO | Elogio os Policiais Militares (...) CB QPPM ******587 VALTER ROCHA DA SILVA (...) pelo empenho, dedicação e espírito de colaboração demonstrados na realização de diversos serviços no âmbito desta Unidade. Os referidos mi
+  PM 3 | ELOGIO | Elogio os Policiais Militares (...) CB QPPM ******275 ISAAC COSTA SOARES (...) pelo empenho, dedicação e espírito de colaboração demonstrados na realização de diversos serviços no âmbito desta Unidade. Os referidos milit
+  PM 2 | ELOGIO | Concedo elogio aos policiais militares CB QPPM ******421 JOSIEL ALMEIDA SANTANA, CB QPPM ******189 JORGE MENDES CAMPELO, pelo destacado desempenho nas atividades de fiscalização de trânsito no município de Buritis. Os re
