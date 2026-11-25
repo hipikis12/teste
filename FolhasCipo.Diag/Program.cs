@@ -68,6 +68,46 @@ foreach (var (txt, esperado) in new (string, int?)[] {
     if (!b2.Any(x => x.Numero == 45)) { Console.WriteLine("FALHA: BI 45 da amostra nao reconhecido"); falhasAmostra = 1; }
 }
 
+
+// ---- amostra BI 38: dois requerimentos e dois pareceres em sequência (nomes fictícios, texto/posições do BI real)
+{
+    var linhasJson = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "amostras", "bi38_requerimentos.json")));
+    var bb = new PdfDocumentBuilder();
+    var ff = bb.AddTrueTypeFont(File.ReadAllBytes(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "arial.ttf")));
+    var paginas = new Dictionary<int, UglyToad.PdfPig.Writer.PdfPageBuilder>();
+    foreach (var e in linhasJson.RootElement.EnumerateArray())
+    {
+        int pn = e.GetProperty("p").GetInt32();
+        if (!paginas.ContainsKey(pn)) { while (paginas.Count < pn) paginas[paginas.Count + 1] = bb.AddPage(595, 842); }
+        paginas[pn].AddText(e.GetProperty("t").GetString()!, 8.5, new UglyToad.PdfPig.Core.PdfPoint(40, 842 - e.GetProperty("y").GetDouble()), ff);
+    }
+    var cam38 = Path.Combine(Path.GetTempPath(), "bi38.pdf");
+    File.WriteAllBytes(cam38, bb.Build());
+    var ef = new List<Policial>
+    {
+        new() { Id = 1, PostoGrad = "CB PM", Quadro = "QPPM", Matricula = "100000000", Nome = "JOAQUIM ROCHA PIRES", NomeGuerra = "PIRES" },
+        new() { Id = 2, PostoGrad = "2º SGT PM", Quadro = "QPPM", Matricula = "100077002", Nome = "REINALDO SOUSA LIMA", NomeGuerra = "LIMA" },
+        new() { Id = 3, PostoGrad = "CB PM", Quadro = "QPPM", Matricula = "100096212", Nome = "ALMIR HENRIQUE COSTA", NomeGuerra = "ALMIR" },
+    };
+    var lt = new LeitorPdf();
+    var its = lt.Ler(cam38);
+    var sg = new Segmentador();
+    var bs = sg.SepararBis(its, lt.IdsSei);
+    Console.WriteLine("=== BI38 amostra: BIs=" + string.Join(",", bs.Select(x => x.Numero)));
+    foreach (var bi in bs)
+    {
+        var atos = sg.Segmentar(bi, its);
+        Console.WriteLine($"=== BI38 atos: {atos.Count}");
+        foreach (var a in atos) Console.WriteLine($"  ato [{a.Secao}] itens={a.Itens.Count} assin={a.Assinatura.Count} 1o='{a.Itens.First().TextoCompleto[..Math.Min(50, a.Itens.First().TextoCompleto.Length)]}'");
+        var rs = new Extrator(new Identificador(ef)).Processar(bi, atos);
+        foreach (var p in rs.Publicacoes)
+        {
+            var tx = string.Join(" ", p.Blocos.Where(x => x.Tipo == "p").Select(x => x.Texto));
+            Console.WriteLine($"  PM {p.PolicialId} | {p.Rotulo} | len={tx.Length} | {tx[..Math.Min(110, tx.Length)]} ... {tx[Math.Max(0, tx.Length - 90)..]}");
+        }
+    }
+}
+
 var efetivo = new List<Policial>
 {
     new() { Id = 1, PostoGrad = "CB PM", Quadro = "QPPM", Matricula = "100094587", Nome = "VALTER ROCHA DA SILVA", NomeGuerra = "ROCHA" },

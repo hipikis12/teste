@@ -11,5 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="amostras\*.pdf" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="amostras\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>
