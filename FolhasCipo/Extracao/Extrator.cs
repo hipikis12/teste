@@ -288,6 +288,19 @@ public class Extrator
         return pecas;
     }
 
+    /// <summary>Dispensa como recompensa: marca INICIO / TERMINO conforme a seção do BI (como nas folhas da P1).</summary>
+    static List<Peca> MarcaIniciaTermino(List<Peca> pecas, string rotulo, string secao)
+    {
+        if (rotulo != "DISPENSA COMO RECOMPENSA" || pecas.Count == 0) return pecas;
+        var m = Regex.Match(secao.ToUpperInvariant(), @"IN[ÍI]CIO|T[ÉE]RMINO");
+        if (!m.Success) return pecas;
+        var tag = m.Value.StartsWith("IN") ? "INICIO" : "TERMINO";
+        var res = new List<Peca>(pecas);
+        if (res[0].Tipo == "t") { if (!res[0].Texto.StartsWith(tag)) res[0] = res[0] with { Texto = tag + " " + res[0].Texto }; }
+        else res.Insert(0, new Peca("t", tag));
+        return res;
+    }
+
     // ---------------- montagem dos blocos ----------------
 
     static List<Bloco> ParaBlocos(List<Peca> pecas, string nomeNorm = "")
@@ -376,10 +389,12 @@ public class Extrator
                 {
                     var pecas = Trecho(us, P, documento);
                     if (!pecas.Any(p => p.Tipo is "t" or "tab")) continue;
+                    var rotulo = Rotulador.Rotulo(ato.Secao, pecas.Where(p => p.Tipo == "t").Select(p => p.Texto).ToList());
+                    pecas = MarcaIniciaTermino(pecas, rotulo, ato.Secao);
                     var blocos = ParaBlocos(pecas, _id.NomeNorm(P));
                     if (blocos.Count == 0) continue;
-                    var pub = new Publicacao { PolicialId = P, Rotulo = Rotulador.Rotulo(ato.Secao, pecas.Where(p => p.Tipo == "t").Select(p => p.Texto).ToList()), Blocos = blocos, Ordem = ordem };
-                    var chave = P + "|" + JsonSerializer.Serialize(blocos);
+                    var pub = new Publicacao { PolicialId = P, Rotulo = rotulo, Blocos = blocos, Ordem = ordem };
+                    var chave = P + "|" + ato.Secao + "|" + JsonSerializer.Serialize(blocos); // INÍCIO e TÉRMINO no mesmo BI são lançamentos distintos
                     if (!vistos.Add(chave)) continue; // repetição exata no mesmo BI
                     // mesma portaria publicada duas vezes no BI (texto do BI + cópia do Diário Oficial)
                     var inicio = string.Join(" ", blocos.Where(b => b.Tipo == "p").Select(b => b.Texto));
