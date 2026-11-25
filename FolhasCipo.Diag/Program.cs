@@ -6,6 +6,7 @@ using System.Text;
 
 // Teste de fumaça: gera um BI sintético (nomes FICTÍCIOS, mesmo layout de um elogio coletivo),
 // lê com o mesmo código do programa e confere se o elogio chega à folha do policial.
+int falhasAmostra = 0;
 var linhas = new (int pag, double top, string t)[]
 {
     (1, 60, "BOLETIM INTERNO da CIPO Nº 11 de 09 de Março de 2026"),
@@ -55,6 +56,18 @@ foreach (var (txt, esperado) in new (string, int?)[] {
     if (r != esperado) Console.WriteLine("FALHA: cabeçalho esperado " + esperado);
 }
 
+// ---- amostra com a geometria real de um BI avulso (quadro grande em volta do texto, nomes removidos)
+{
+    var amostra = Path.Combine(AppContext.BaseDirectory, "amostras", "bi_pagina1_geometria_real.pdf");
+    var l2 = new LeitorPdf();
+    var it2 = l2.Ler(amostra);
+    Console.WriteLine("=== AMOSTRA GEOMETRIA REAL: itens ===");
+    foreach (var i in it2.Take(30)) Console.WriteLine(i);
+    var b2 = new Segmentador().SepararBis(it2, l2.IdsSei);
+    Console.WriteLine("=== AMOSTRA: BIs encontrados = " + string.Join(",", b2.Select(x => x.Numero)));
+    if (!b2.Any(x => x.Numero == 45)) { Console.WriteLine("FALHA: BI 45 da amostra nao reconhecido"); falhasAmostra = 1; }
+}
+
 var efetivo = new List<Policial>
 {
     new() { Id = 1, PostoGrad = "CB PM", Quadro = "QPPM", Matricula = "100094587", Nome = "VALTER ROCHA DA SILVA", NomeGuerra = "ROCHA" },
@@ -83,4 +96,4 @@ foreach (var bi in bis)
         if (!res.Publicacoes.Any(p => p.PolicialId == id && p.Rotulo == "ELOGIO"))
         { Console.WriteLine($"FALHA: PM {id} sem ELOGIO"); falhas++; }
 }
-return falhas == 0 ? 0 : 1;
+return falhas + falhasAmostra == 0 ? 0 : 1;

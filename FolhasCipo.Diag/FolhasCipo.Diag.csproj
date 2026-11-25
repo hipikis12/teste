@@ -9,4 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\FolhasCipo\FolhasCipo.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="amostras\*.pdf" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
