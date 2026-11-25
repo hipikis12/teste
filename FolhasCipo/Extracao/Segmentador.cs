@@ -152,6 +152,25 @@ public class Segmentador
         public List<Item> Itens = new();
     }
 
+    // cabeçalho tolerante: sem espaços (letras espaçadas pelo PDF), em maiúsculas, com ou sem "da CIPO"
+    static readonly Regex BiHeaderCompacto = new(@"^BOLETIMINTERNO(?:D[AOE])?[A-Z/\-0-9]{0,30}?N[ºO°]?(\d{1,3})(?!\d)", O);
+
+    /// <summary>Número do BI se a linha for o cabeçalho "BOLETIM INTERNO ... Nº xx", senão null.</summary>
+    public static int? NumeroDoCabecalho(string texto)
+    {
+        var t = texto.Trim();
+        if (t.Length == 0 || t.Length > 140) return null;
+        var m = BiHeader.Match(t);
+        if (m.Success) return int.Parse(m.Groups[1].Value);
+        // só vale se a linha estiver (quase toda) em maiúsculas: evita "Boletim Interno nº 5" citado dentro de um texto
+        if (Texto.ProporcaoMaiusculas(t) < 0.8) return null;
+        var sq = Regex.Replace(Texto.SemAcento(t).ToUpperInvariant(), @"[\s\.]+", "");
+        var m2 = BiHeaderCompacto.Match(sq);
+        return m2.Success ? int.Parse(m2.Groups[1].Value) : null;
+    }
+
+    static string TextoDoItem(Item it) => it.EhTabela ? string.Join(" ", it.Celulas) : it.Texto;
+
     /// <summary>Separa os BIs contidos no PDF (um ou vários).</summary>
     public List<Bi> SepararBis(List<Item> itens, Dictionary<int, string> idsSei)
     {
@@ -160,19 +179,24 @@ public class Segmentador
         for (int k = 0; k < itens.Count; k++)
         {
             var it = itens[k];
-            if (!it.EhTabela)
+            var n = NumeroDoCabecalho(TextoDoItem(it));
+            if (n != null)
             {
-                var m = BiHeader.Match(it.Texto.Trim());
-                if (m.Success)
-                {
-                    var ctx = it.Texto + " " + string.Join(" ", itens.Skip(k + 1).Take(3).Where(x => !x.EhTabela).Select(x => x.Texto));
-                    int n = int.Parse(m.Groups[1].Value);
-                    cur = new Bi { Numero = n, Data = DataDoCabecalho(ctx, DateTime.Today), SeiId = idsSei.GetValueOrDefault(n, "") };
-                    bis.Add(cur);
-                    continue;
-                }
+                var ctx = TextoDoItem(it) + " " + string.Join(" ", itens.Skip(k + 1).Take(4).Select(TextoDoItem));
+                cur = new Bi { Numero = n.Value, Data = DataDoCabecalho(ctx, DateTime.Today), SeiId = idsSei.GetValueOrDefault(n.Value, "") };
+                bis.Add(cur);
+                continue;
             }
             cur?.Itens.Add(it);
+        }
+        // PDF de um único BI sem o cabeçalho reconhecível: usa o número do rodapé "Boletim Interno Nº xx (id)"
+        if (bis.Count == 0 && idsSei.Count == 1)
+        {
+            var (num, id) = idsSei.First();
+            var ctx = string.Join(" ", itens.Take(40).Select(TextoDoItem));
+            var bi = new Bi { Numero = num, Data = DataDoCabecalho(ctx, DateTime.Today), SeiId = id };
+            bi.Itens.AddRange(itens);
+            bis.Add(bi);
         }
         return bis;
     }

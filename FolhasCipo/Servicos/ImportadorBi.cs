@@ -28,7 +28,29 @@ public class ImportadorBi
         var seg = new Segmentador();
         var bis = seg.SepararBis(itens, leitor.IdsSei);
         if (bis.Count == 0)
-            throw new InvalidOperationException("Não encontrei o cabeçalho \"BOLETIM INTERNO ... Nº\" no PDF. Verifique se o arquivo é um BI.");
+        {
+            // guarda o que foi lido para diagnóstico (primeiras linhas e linhas que citam "boletim")
+            string dump = "";
+            try
+            {
+                var pasta = Path.Combine(AppContext.BaseDirectory, "dados", "diagnostico");
+                Directory.CreateDirectory(pasta);
+                var linhas = itens.Take(60).Select(i => i.ToString()).ToList();
+                linhas.Add("--- linhas com 'boletim' ---");
+                linhas.AddRange(itens.Where(i => i.TextoCompleto.Contains("boletim", StringComparison.OrdinalIgnoreCase)).Take(40).Select(i => i.ToString()));
+                dump = Path.Combine(pasta, "leitura_sem_cabecalho.txt");
+                File.WriteAllLines(dump, linhas);
+            }
+            catch { }
+            throw new InvalidOperationException("Não encontrei o cabeçalho \"BOLETIM INTERNO ... Nº\" no PDF (" + itens.Count + " linhas lidas). " +
+                "Verifique se o arquivo é um BI." + (dump.Length > 0 ? " Detalhes salvos em: " + dump : ""));
+        }
+        {
+            var nums = bis.Select(b => b.Numero).Distinct().OrderBy(n => n).ToList();
+            resumo.Linhas.Add("BIs encontrados no PDF: " + string.Join(", ", nums));
+            var faltam = Enumerable.Range(nums.First(), nums.Last() - nums.First() + 1).Except(nums).ToList();
+            if (faltam.Count > 0) resumo.Linhas.Add("   ATENÇÃO: faltam no PDF os BIs: " + string.Join(", ", faltam));
+        }
 
         var extrator = new Extrator(new Identificador(efetivo));
         foreach (var bi in bis)
