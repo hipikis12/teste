@@ -45,6 +45,16 @@ foreach (var (_, top, t) in linhas)
 var caminho = Path.Combine(Path.GetTempPath(), "bi_sintetico.pdf");
 File.WriteAllBytes(caminho, b.Build());
 
+foreach (var (txt, esperado) in new (string, int?)[] {
+    ("BOLETIM INTERNO da CIPO Nº 34", 34), ("BOLETIM INTERNO da CIPO Nº 11 CIPO/P-1 de 09 de Março de 2026.", 11),
+    ("B O L E T I M  I N T E R N O  da CIPO N º 1 5", 15), ("BOLETIM INTERNO", null),
+    ("Publicar a presente portaria em Boletim Interno nº 5 da CIPO", null) })
+{
+    var r = Segmentador.NumeroDoCabecalho(txt);
+    Console.WriteLine($"cabecalho '{txt}' => {r}");
+    if (r != esperado) Console.WriteLine("FALHA: cabeçalho esperado " + esperado);
+}
+
 var efetivo = new List<Policial>
 {
     new() { Id = 1, PostoGrad = "CB PM", Quadro = "QPPM", Matricula = "100094587", Nome = "VALTER ROCHA DA SILVA", NomeGuerra = "ROCHA" },
