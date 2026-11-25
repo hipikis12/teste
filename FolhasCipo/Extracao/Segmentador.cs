@@ -93,7 +93,8 @@ public class Segmentador
         while (j + 1 < its.Count && !its[j + 1].EhTabela)
         {
             var n = its[j + 1].Texto.Trim();
-            if (n.StartsWith("Portaria n") && _freq.GetValueOrDefault(n) < 3) break; // título de nova portaria, não designação
+            if (n.StartsWith("Portaria n") && _freq.GetValueOrDefault(n) < 3
+                && !(j + 2 < its.Count && !its[j + 2].EhTabela && Regex.IsMatch(its[j + 2].Texto.Trim(), @"^Processo\b"))) break; // título de nova portaria, não designação (Portaria + Processo logo após a assinatura = rodapé do documento)
             if (n.Length < 120 && (Func.IsMatch(n) || RankOnly.IsMatch(n) || Regex.IsMatch(n, @"^(PMRO|CIPO|CRP)")) && Cabecalho(n) == null) j++;
             else break;
         }
