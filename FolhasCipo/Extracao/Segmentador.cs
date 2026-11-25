@@ -179,7 +179,12 @@ public class Segmentador
         for (int k = 0; k < itens.Count; k++)
         {
             var it = itens[k];
-            var n = NumeroDoCabecalho(TextoDoItem(it));
+            // o título pode estar dentro de um quadro/tabela (BI avulso): olha cada linha de cada célula
+            var candidatos = it.EhTabela
+                ? it.Celulas.SelectMany(c => c.Split('\n')).ToList()
+                : new List<string> { it.Texto };
+            int? n = null;
+            foreach (var cand in candidatos) { n = NumeroDoCabecalho(cand); if (n != null) break; }
             if (n != null)
             {
                 var ctx = TextoDoItem(it) + " " + string.Join(" ", itens.Skip(k + 1).Take(4).Select(TextoDoItem));
